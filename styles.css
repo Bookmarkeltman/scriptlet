@@ -4,13 +4,92 @@ body {
     font-family: 'Silkscreen', cursive;
     background-color: #000; /* Black background */
     color: #fff; /* White text */
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
 }
 
-#container {
-    max-width: 800px;
-    margin: 50px auto;
-    text-align: center;
+/* Side Navigation Styling */
+#side-nav {
+    width: 250px;
+    background-color: #111;
+    color: #fff;
     padding: 20px;
-    border: 2px solid #fff;
-    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border-right: 2px solid #fff;
+}
+
+#side-nav h2 {
+    margin: 0 0 20px;
+    font-size: 1.5em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+#side-nav nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+#side-nav nav ul li {
+    margin: 10px 0;
+    width: 100%;
+}
+
+#side-nav nav ul li a {
+    text-decoration: none;
+    color: #fff;
+    padding: 10px 15px;
+    display: block;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+    border-radius: 5px;
+    position: relative;
+}
+
+#side-nav nav ul li a:hover {
+    background-color: #333;
+    color: #fff;
+    transform: translateX(5px);
+}
+
+#side-nav nav ul li a:focus {
+    outline: none;
+    background-color: #555;
+    transform: translateX(10px);
+}
+
+/* Main Content Styling */
+#main-content {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#main-content h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+#main-content p {
+    font-size: 1.2em;
+    line-height: 1.5;
+}
+
+/* Animations */
+@keyframes hoverEffect {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(5px);
+    }
 }
