@@ -6,28 +6,29 @@ body {
     background-color: #000; /* Black background */
     color: #fff; /* White text */
     display: flex;
-    flex-direction: row;
     height: 100vh;
+    overflow: hidden;
 }
 
 /* Side Navigation Styles */
 #side-nav {
-    width: 250px;
-    background-color: #111;
-    color: #fff;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    border-right: 2px solid #fff;
     position: fixed;
-    height: 100vh;
+    right: -200px; /* Hidden by default */
+    top: 0;
+    height: 100%;
+    width: 200px;
+    background-color: #000; /* Black background */
+    border-left: 2px solid #fff; /* White outline */
+    transition: right 0.3s ease-in-out;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#side-nav h2 {
-    margin: 0 0 20px;
-    font-size: 1.5em;
-    text-transform: uppercase;
+/* Show the nav menu on hover */
+body:hover #side-nav {
+    right: 0; /* Slide in from the right */
 }
 
 #side-nav nav ul {
@@ -35,40 +36,33 @@ body {
     padding: 0;
     margin: 0;
     width: 100%;
+    text-align: center;
 }
 
 #side-nav nav ul li {
     margin: 10px 0;
-    width: 100%;
 }
 
 #side-nav nav ul li a {
     text-decoration: none;
     color: #fff;
-    padding: 10px 15px;
+    font-size: 1.2em;
     display: block;
-    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #fff; /* White outline */
+    background-color: #000; /* Black buttons */
     transition: all 0.3s ease-in-out;
     border-radius: 5px;
-    position: relative;
 }
 
 #side-nav nav ul li a:hover {
-    background-color: #333;
-    color: #fff;
-    transform: scale(1.05);
+    background-color: #fff; /* Invert colors on hover */
+    color: #000;
 }
 
-#side-nav nav ul li a:focus {
-    outline: none;
-    background-color: #555;
-    transform: scale(1.1);
-}
-
-/* Main Content Styles */
+/* Main Content Styling */
 #main-content {
     flex: 1;
-    margin-left: 260px; /* Offset for the side-nav */
     padding: 40px;
     display: flex;
     flex-direction: column;
@@ -85,4 +79,21 @@ body {
 #main-content p {
     font-size: 1.2em;
     line-height: 1.5;
+}
+
+/* Mobile-Friendly Design */
+@media (max-width: 768px) {
+    #side-nav {
+        width: 150px; /* Smaller width for mobile */
+        right: -150px; /* Hidden state for mobile */
+    }
+
+    #side-nav nav ul li a {
+        font-size: 1em; /* Adjust font size for smaller screens */
+        padding: 8px 10px;
+    }
+
+    body:hover #side-nav {
+        right: 0; /* Slide in for mobile as well */
+    }
 }
