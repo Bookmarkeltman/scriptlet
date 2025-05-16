@@ -3,25 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist Black-and-White Website</title>
+    <title>Encrypted Messaging System</title>
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Silkscreen', cursive;
+            background-color: #000;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #login, #messaging {
+            margin-top: 50px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div id="side-nav">
-        <nav>
-            <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-        </nav>
+    <div id="login">
+        <h1>Secure Messaging System</h1>
+        <button id="google-sign-in">Sign in with Google</button>
     </div>
-    <div id="main-content">
-        <h1>Welcome to My Minimalist Website</h1>
-        <p>This is a simple and elegant website with a black-and-white theme and smooth animations.</p>
-        <p>Hover over the right side of the screen to reveal the navigation menu!</p>
+
+    <div id="messaging" class="hidden">
+        <h2>Welcome, <span id="user-email"></span></h2>
+        <textarea id="message" placeholder="Enter your message"></textarea>
+        <br>
+        <button id="send-message">Send Message</button>
+        <h3>Messages</h3>
+        <div id="message-list"></div>
     </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        let userEmail;
+        const ownerEmail = "peanut20230@gmail.com";
+
+        // Google Sign-In
+        function handleCredentialResponse(response) {
+            const data = parseJwt(response.credential);
+            userEmail = data.email;
+            document.getElementById("user-email").textContent = userEmail;
+
+            if (userEmail === ownerEmail) {
+                alert("You are the owner!");
+            }
+
+            document.getElementById("login").classList.add("hidden");
+            document.getElementById("messaging").classList.remove("hidden");
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(
+                atob(base64)
+                    .split('')
+                    .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                    .join('')
+            );
+            return JSON.parse(jsonPayload);
+        }
+
+        window.onload = function () {
+            google.accounts.id.initialize({
+                client_id: "YOUR_GOOGLE_CLIENT_ID",
+                callback: handleCredentialResponse,
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-sign-in"),
+                { theme: "outline", size: "large" }
+            );
+        };
+
+        // Sending Messages
+        document.getElementById("send-message").onclick = async function () {
+            const message = document.getElementById("message").value;
+            const encryptedMessage = await encryptMessage(message, userEmail);
+
+            // Send encrypted message to the server
+            fetch("/api/messages", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: userEmail,
+                    message: encryptedMessage,
+                }),
+            });
+
+            document.getElementById("message").value = "";
+        };
+
+        // Encrypt Message
+        async function encryptMessage(message, recipientEmail) {
+            const encoder = new TextEncoder();
+            const encodedMessage = encoder.encode(message);
+
+            // Fetch recipient's public key from the server
+            const response = await fetch(`/api/public-key?email=${recipientEmail}`);
+            const { publicKey } = await response.json();
+
+            const importedKey = await crypto.subtle.importKey(
+                "spki",
+                Uint8Array.from(atob(publicKey), c => c.charCodeAt(0)),
+                { name: "RSA-OAEP", hash: "SHA-256" },
+                false,
+                ["encrypt"]
+            );
+
+            const encryptedMessage = await crypto.subtle.encrypt(
+                { name: "RSA-OAEP" },
+                importedKey,
+                encodedMessage
+            );
+
+            return btoa(String.fromCharCode(...new Uint8Array(encryptedMessage)));
+        }
+    </script>
 </body>
 </html>
