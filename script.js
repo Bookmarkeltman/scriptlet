@@ -1,112 +1,107 @@
-var ownerEmail = "peanut20230@gmail.com";
-var adminList = [ownerEmail];
-
-// Page load: check login state
-window.onload = function () {
-    checkLoginState();
-
-    google.accounts.id.initialize({
-        client_id: "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com",
-        callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(
-        document.getElementById("google-login-container"),
-        { theme: "dark", size: "medium" }
-    );
-    document.getElementById("logout-admin").onclick = switchAccount;
-    document.getElementById("logout-user").onclick = switchAccount;
-    document.getElementById("add-admin-btn").onclick = addAdmin;
-    showPage('home');
+// --------- FIREBASE CONFIG ---------
+const firebaseConfig = {
+  apiKey: "AIzaSyAYMjMNB1QZ62gNwUzTyFJiG8rFlzTeGSo",
+  authDomain: "scriptlet-ee26a.firebaseapp.com",
+  projectId: "scriptlet-ee26a",
+  storageBucket: "scriptlet-ee26a.appspot.com",
+  messagingSenderId: "517893830066",
+  appId: "1:517893830066:web:90924f27226ef5da55a0ab",
+  measurementId: "G-RSLERH0HHF"
 };
+// --------- END CONFIG ----------
 
-function checkLoginState() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', '/whoami');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            var data = JSON.parse(xhr.responseText);
-            adminList = data.admins || [ownerEmail];
-            if (data.loggedIn) {
-                showDashboard(data.user.email, data.user.name, data.user.picture, data.isAdmin, data.isOwner);
-            } else {
-                showLoggedOut();
-            }
-        }
-    };
-    xhr.send();
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const OWNER_EMAIL = "peanut20230@gmail.com"; // Change to your owner email if needed
+
+// Navigation
+function showPage(page) {
+  var pages = document.getElementsByClassName('page');
+  for (var i = 0; i < pages.length; i++) pages[i].classList.remove('hidden');
+  for (var i = 0; i < pages.length; i++) {
+    if (pages[i].id !== 'page-' + page) pages[i].classList.add("hidden");
+  }
 }
+document.querySelectorAll('#side-nav nav ul li a').forEach(link => {
+  link.onclick = function(e) {
+    e.preventDefault();
+    const page = this.getAttribute('data-page');
+    if (page) showPage(page);
+  };
+});
 
-function handleCredentialResponse(response) {
-    // Use backend for login
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/login');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            checkLoginState();
-        } else {
-            alert('Login failed');
-        }
-    };
-    xhr.send(JSON.stringify({ credential: response.credential }));
-}
+// Login/Logout
+document.getElementById('login-btn').onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+};
+document.getElementById('logout-admin').onclick = () => auth.signOut();
+document.getElementById('logout-user').onclick = () => auth.signOut();
 
-function showDashboard(email, name, picture, isAdmin, isOwner) {
-    if (isAdmin) {
-        document.getElementById("admin-profile-picture").src = picture;
-        document.getElementById("admin-email").textContent = email;
-        document.getElementById("admin-name").textContent = name;
-        document.getElementById("admin-dashboard").className = document.getElementById("admin-dashboard").className.replace(/\bhidden\b/g, '');
-        if (isOwner) {
-            document.getElementById("add-admin-section").classList.remove('hidden');
-        } else {
-            document.getElementById("add-admin-section").classList.add('hidden');
+// On Auth state change
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    const email = user.email;
+    const name = user.displayName;
+    const picture = user.photoURL;
+    let isAdmin = false, isOwner = false;
+
+    if (email === OWNER_EMAIL) isOwner = isAdmin = true;
+    else {
+      // Check admin list in Firestore
+      try {
+        const doc = await db.collection('adminList').doc('admins').get();
+        if (doc.exists && Array.isArray(doc.data().emails)) {
+          isAdmin = doc.data().emails.includes(email);
         }
-        if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
-    } else {
-        document.getElementById("user-profile-picture").src = picture;
-        document.getElementById("user-email").textContent = email;
-        document.getElementById("user-name").textContent = name;
-        document.getElementById("user-dashboard").className = document.getElementById("user-dashboard").className.replace(/\bhidden\b/g, '');
-        if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
-        document.getElementById("add-admin-section").classList.add('hidden');
+      } catch (e) { /* ignore */ }
     }
-    document.getElementById("google-login-container").className += " hidden";
-}
 
-function showLoggedOut() {
-    document.getElementById("google-login-container").className = document.getElementById("google-login-container").className.replace(/\bhidden\b/g, '');
-    if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
-    if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
-    document.getElementById("add-admin-section").classList.add('hidden');
-}
-
-// "Switch Account" and logout: clear session and re-show Google prompt
-function switchAccount() {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/logout');
-    xhr.onload = function() {
-        // Google One Tap prompt will reappear after logout
-        showLoggedOut();
-        google.accounts.id.prompt();
-    };
-    xhr.send();
-}
+    // Show dashboards
+    if (isAdmin) {
+      document.getElementById("admin-profile-picture").src = picture;
+      document.getElementById("admin-email").textContent = email;
+      document.getElementById("admin-name").textContent = name;
+      document.getElementById("admin-dashboard").classList.remove('hidden');
+      document.getElementById("user-dashboard").classList.add('hidden');
+      if (isOwner) document.getElementById("add-admin-section").classList.remove('hidden');
+      else document.getElementById("add-admin-section").classList.add('hidden');
+    } else {
+      document.getElementById("user-profile-picture").src = picture;
+      document.getElementById("user-email").textContent = email;
+      document.getElementById("user-name").textContent = name;
+      document.getElementById("user-dashboard").classList.remove('hidden');
+      document.getElementById("admin-dashboard").classList.add('hidden');
+      document.getElementById("add-admin-section").classList.add('hidden');
+    }
+    document.getElementById("login-container").classList.add("hidden");
+  } else {
+    // Not signed in
+    document.getElementById("login-container").classList.remove("hidden");
+    document.getElementById("admin-dashboard").classList.add("hidden");
+    document.getElementById("user-dashboard").classList.add("hidden");
+    document.getElementById("add-admin-section").classList.add("hidden");
+  }
+});
 
 // Owner: Add Admin
-function addAdmin() {
-    var email = prompt("Enter the email to add as admin:");
-    if (!email) return;
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/add-admin');
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            alert("Admin added!");
-            checkLoginState();
-        } else {
-            alert("Failed to add admin: " + xhr.responseText);
-        }
-    };
-    xhr.send(JSON.stringify({ email: email }));
-}
+document.getElementById('add-admin-btn').onclick = async () => {
+  const user = auth.currentUser;
+  if (!user || user.email !== OWNER_EMAIL) return alert("Only owner can add admins!");
+  const email = prompt("Enter the email to add as admin:");
+  if (!email) return;
+  const docRef = db.collection('adminList').doc('admins');
+  await db.runTransaction(async (transaction) => {
+    const doc = await transaction.get(docRef);
+    let emails = [];
+    if (doc.exists && Array.isArray(doc.data().emails)) emails = doc.data().emails;
+    if (!emails.includes(email)) emails.push(email);
+    transaction.set(docRef, { emails });
+  });
+  alert("Admin added!");
+};
+
+// Default page
+showPage('home');
