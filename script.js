@@ -1,99 +1,12 @@
-// Compatible with ES5/Server Version 5!
+// ... Sidebar and navigation code as before ...
+
 var ownerEmail = "peanut20230@gmail.com";
 
-// Sidebar for mobile/tablet
-var sideNav = document.getElementById('side-nav');
-var menuToggle = document.getElementById('menu-toggle');
-var sidebarOverlay = document.getElementById('sidebar-overlay');
-
-// Open sidebar
-function openSidebar() {
-    if (sideNav.className.indexOf('open') === -1) sideNav.className += ' open';
-    if (sidebarOverlay.className.indexOf('open') === -1) sidebarOverlay.className += ' open';
-}
-// Close sidebar
-function closeSidebar() {
-    sideNav.className = sideNav.className.replace(/\bopen\b/g, '');
-    sidebarOverlay.className = sidebarOverlay.className.replace(/\bopen\b/g, '');
-}
-
-if (menuToggle) {
-    menuToggle.onclick = function(e) {
-        e.stopPropagation();
-        if (sideNav.className.indexOf('open') !== -1) {
-            closeSidebar();
-        } else {
-            openSidebar();
-        }
-    };
-}
-if (sidebarOverlay) {
-    sidebarOverlay.onclick = function() {
-        closeSidebar();
-    };
-}
-
-// Optional: close sidebar on nav tap (mobile)
-var navLinks = sideNav.getElementsByTagName('a');
-for (var i = 0; i < navLinks.length; i++) {
-    navLinks[i].onclick = function() {
-        if (window.innerWidth <= 900) closeSidebar();
-    };
-}
-
-// Simple page routing (no reload)
-function showPage(page) {
-    var pages = document.getElementsByClassName('page');
-    for (var i = 0; i < pages.length; i++) pages[i].className = pages[i].className.replace(/\bhidden\b/g, '');
-    for (var i = 0; i < pages.length; i++) {
-        if (pages[i].id !== 'page-' + page) {
-            if (pages[i].className.indexOf('hidden') === -1) pages[i].className += " hidden";
-        }
-    }
-}
-// Handle navigation click
-for (var i = 0; i < navLinks.length; i++) {
-    navLinks[i].onclick = (function(i) {
-        return function(e) {
-            e.preventDefault();
-            var page = navLinks[i].getAttribute('data-page');
-            if (page) showPage(page);
-            if (window.innerWidth <= 900) closeSidebar();
-        };
-    })(i);
-}
-
-// Google Sign-In and dashboard
-function handleCredentialResponse(response) {
-    var data = parseJwt(response.credential);
-    var userEmail = data.email;
-    var profilePicture = data.picture;
-    var userName = data.name;
-
-    if (userEmail === ownerEmail) {
-        document.getElementById("admin-profile-picture").src = profilePicture;
-        document.getElementById("admin-email").textContent = userEmail;
-        document.getElementById("admin-name").textContent = userName;
-        document.getElementById("admin-dashboard").className = document.getElementById("admin-dashboard").className.replace(/\bhidden\b/g, '');
-        if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
-    } else {
-        document.getElementById("user-profile-picture").src = profilePicture;
-        document.getElementById("user-email").textContent = userEmail;
-        document.getElementById("user-name").textContent = userName;
-        document.getElementById("user-dashboard").className = document.getElementById("user-dashboard").className.replace(/\bhidden\b/g, '');
-        if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
-    }
-    document.getElementById("google-login-container").className += " hidden";
-}
-
-function logout() {
-    document.getElementById("google-login-container").className = document.getElementById("google-login-container").className.replace(/\bhidden\b/g, '');
-    if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
-    if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
-}
-
+// On page load, check login state
 window.onload = function () {
-    // Google Sign-In
+    checkLoginState();
+
+    // Google One Tap setup
     google.accounts.id.initialize({
         client_id: "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com",
         callback: handleCredentialResponse
@@ -102,7 +15,7 @@ window.onload = function () {
         document.getElementById("google-login-container"),
         { theme: "dark", size: "medium" }
     );
-    // Logout buttons
+    // Bind logout
     var logoutAdmin = document.getElementById("logout-admin");
     var logoutUser = document.getElementById("logout-user");
     if (logoutAdmin) logoutAdmin.onclick = logout;
@@ -111,16 +24,70 @@ window.onload = function () {
     showPage('home');
 };
 
-function parseJwt(token) {
-    var base64Url = token.split('.')[1];
-    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    var jsonPayload = decodeURIComponent(
-        window.atob(base64)
-            .split('')
-            .map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            })
-            .join('')
-    );
-    return JSON.parse(jsonPayload);
+// Call backend to check if logged in
+function checkLoginState() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/whoami');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.loggedIn) {
+                showDashboard(data.user.email, data.user.name, data.user.picture);
+            } else {
+                showLoggedOut();
+            }
+        }
+    };
+    xhr.send();
 }
+
+// Google login handler
+function handleCredentialResponse(response) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/login');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            showDashboard(data.user.email, data.user.name, data.user.picture);
+        } else {
+            alert('Login failed');
+        }
+    };
+    xhr.send(JSON.stringify({ credential: response.credential }));
+}
+
+function showDashboard(email, name, picture) {
+    if (email === ownerEmail) {
+        document.getElementById("admin-profile-picture").src = picture;
+        document.getElementById("admin-email").textContent = email;
+        document.getElementById("admin-name").textContent = name;
+        document.getElementById("admin-dashboard").className = document.getElementById("admin-dashboard").className.replace(/\bhidden\b/g, '');
+        if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
+    } else {
+        document.getElementById("user-profile-picture").src = picture;
+        document.getElementById("user-email").textContent = email;
+        document.getElementById("user-name").textContent = name;
+        document.getElementById("user-dashboard").className = document.getElementById("user-dashboard").className.replace(/\bhidden\b/g, '');
+        if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
+    }
+    document.getElementById("google-login-container").className += " hidden";
+}
+
+function showLoggedOut() {
+    document.getElementById("google-login-container").className = document.getElementById("google-login-container").className.replace(/\bhidden\b/g, '');
+    if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
+    if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
+}
+
+// Logout: call backend to clear cookie
+function logout() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/logout');
+    xhr.onload = function() {
+        showLoggedOut();
+    };
+    xhr.send();
+}
+
+// ... Sidebar/mobile nav and showPage() functions as before ...
