@@ -1,0 +1,82 @@
+const express = require('express');
+const cookieParser = require('cookie-parser');
+const { OAuth2Client } = require('google-auth-library');
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+
+// Replace with your Google Client ID
+const GOOGLE_CLIENT_ID = "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com";
+const ADMIN_EMAIL = "peanut20230@gmail.com";
+
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+
+app.use(express.static(__dirname)); // Serve static files (index.html, etc)
+app.use(express.json());
+app.use(cookieParser("your-very-secret-key")); // for signed cookies
+
+// Helper: Check cookie, return user object or null
+function getUserFromCookie(req) {
+    try {
+        if (!req.signedCookies.user) return null;
+        return JSON.parse(req.signedCookies.user);
+    } catch (e) {
+        return null;
+    }
+}
+
+// Login endpoint (POST)
+app.post('/login', async (req, res) => {
+    const { credential } = req.body;
+    if (!credential) return res.status(400).json({ error: 'No credential provided' });
+
+    try {
+        // Verify Google token
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+
+        // Save minimal info
+        const user = {
+            email: payload.email,
+            name: payload.name,
+            picture: payload.picture
+        };
+
+        // Set signed cookie for 7 days, HTTP Only
+        res.cookie('user', JSON.stringify(user), {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            signed: true
+        });
+
+        res.json({ ok: true, user: user });
+    } catch (e) {
+        res.status(401).json({ error: 'Invalid credential' });
+    }
+});
+
+// Logout endpoint
+app.post('/logout', (req, res) => {
+    res.clearCookie('user');
+    res.json({ ok: true });
+});
+
+// Endpoint for getting user info (for frontend to know who's logged in)
+app.get('/whoami', (req, res) => {
+    const user = getUserFromCookie(req);
+    if (!user) return res.json({ loggedIn: false });
+    res.json({ loggedIn: true, user: user, isAdmin: user.email === ADMIN_EMAIL });
+});
+
+// Serve index.html as fallback
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log("Server running at http://localhost:" + PORT);
+});
