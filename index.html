@@ -31,10 +31,10 @@
         </div>
         <nav>
             <ul>
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="#" data-page="home">Home</a></li>
+                <li><a href="#" data-page="about">About</a></li>
+                <li><a href="#" data-page="services">Services</a></li>
+                <li><a href="#" data-page="contact">Contact</a></li>
             </ul>
         </nav>
     </div>
@@ -42,12 +42,31 @@
 
     <!-- Main Content -->
     <div id="main-content">
-        <h1>WELCOME TO MY MINIMALIST WEBSITE</h1>
-        <p>This is a simple and elegant website with a black-and-white theme and smooth animations.</p>
-        <p>Hover over the right side of the screen or tap the menu on mobile to reveal the navigation!</p>
+        <!-- Home Page -->
+        <div class="page" id="page-home">
+            <h1>WELCOME TO MY MINIMALIST WEBSITE</h1>
+            <p>This is a simple and elegant website with a black-and-white theme and smooth animations.</p>
+            <p>Hover over the right side of the screen or tap the menu on mobile to reveal the navigation!</p>
+        </div>
+        <!-- About Page -->
+        <div class="page hidden" id="page-about">
+            <h1>ABOUT</h1>
+            <p>This minimalist site demonstrates login, admin/user dashboards, and responsive navigation.</p>
+        </div>
+        <!-- Services Page -->
+        <div class="page hidden" id="page-services">
+            <h1>SERVICES</h1>
+            <p>We offer clean web design, user authentication, and more, all in a retro-inspired style.</p>
+        </div>
+        <!-- Contact Page -->
+        <div class="page hidden" id="page-contact">
+            <h1>CONTACT</h1>
+            <p>Email: youremail@example.com</p>
+            <p>Twitter: <a href="https://twitter.com/" target="_blank">@yourhandle</a></p>
+        </div>
 
         <!-- Admin Dashboard -->
-        <div id="admin-dashboard" class="hidden">
+        <div id="admin-dashboard" class="hidden dashboard">
             <h2>ADMIN DASHBOARD</h2>
             <img id="admin-profile-picture" alt="Profile Picture">
             <p><b>EMAIL:</b> <span id="admin-email"></span></p>
@@ -56,7 +75,7 @@
         </div>
 
         <!-- User Dashboard -->
-        <div id="user-dashboard" class="hidden">
+        <div id="user-dashboard" class="hidden dashboard">
             <h2>USER DASHBOARD</h2>
             <img id="user-profile-picture" alt="Profile Picture">
             <p><b>EMAIL:</b> <span id="user-email"></span></p>
