@@ -4,52 +4,186 @@ body {
     font-family: 'Silkscreen', cursive;
     background-color: #000;
     color: #fff;
-    display: flex;
-    min-height: 100vh;
-    overflow: hidden;
+    height: 100vh;
+    overflow-x: hidden;
 }
 
-/* ... (all previous styles from your CSS) ... */
+a {
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover {
+    color: #0ff;
+    text-decoration: underline;
+}
 
-#debug-menu {
+#side-nav {
     position: fixed;
-    top: 40px;
-    right: 40px;
-    background: #111;
-    color: #0f0;
-    border: 2px solid #fff;
-    border-radius: 8px;
-    padding: 18px 22px 16px 22px;
-    z-index: 9999;
-    min-width: 300px;
-    box-shadow: 0 0 20px #fff4;
-    font-family: monospace;
+    top: 0;
+    right: -240px;
+    height: 100%;
+    width: 220px;
+    background-color: #000;
+    border-left: 2px solid #fff;
+    transition: right 0.3s cubic-bezier(.4,2,.6,1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
 }
-#debug-menu h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
+
+#side-nav #google-login-container {
+    margin-bottom: 40px;
+}
+
+#side-nav nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    text-align: center;
+}
+
+#side-nav nav ul li {
+    margin: 10px 0;
+}
+
+#side-nav nav ul li a {
     color: #fff;
-    font-family: 'Silkscreen', cursive;
-}
-#debug-menu pre {
-    margin: 0 0 14px 0;
-    font-family: monospace;
-    font-size: 1em;
-    color: #0f0;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-#debug-menu button {
-    background: #000;
-    color: #fff;
+    font-size: 1.2em;
+    display: block;
+    padding: 10px 15px;
     border: 2px solid #fff;
+    background-color: #000;
+    transition: all 0.3s ease-in-out;
     border-radius: 5px;
-    padding: 4px 14px;
-    cursor: pointer;
-    font-family: 'Silkscreen', cursive;
-    font-size: 1em;
+    margin: 0 8px;
 }
-#debug-menu button:hover {
+
+#side-nav nav ul li a:hover {
+    background-color: #fff;
+    color: #000;
+}
+
+#main-content {
+    min-height: 100vh;
+    min-width: 100vw;
+    box-sizing: border-box;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#main-content h1 {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+#main-content p {
+    font-size: 1.1em;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+}
+
+#admin-dashboard, #user-dashboard {
+    text-align: center;
+    margin-top: 24px;
+    background: rgba(0,0,0,0.6);
+    border: 1.5px solid #fff;
+    border-radius: 12px;
+    padding: 22px 34px 26px 34px;
+    display: inline-block;
+    min-width: 260px;
+}
+
+#admin-dashboard img, #user-dashboard img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    margin: 18px 0 12px 0;
+    border: 2px solid #fff;
+}
+
+.hidden {
+    display: none;
+}
+
+button {
+    font-family: 'Silkscreen', cursive;
     background: #fff;
     color: #000;
+    border: 2px solid #fff;
+    padding: 8px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 12px;
+    font-size: 1em;
+    transition: background 0.2s, color 0.2s;
+}
+button:hover {
+    background: #000;
+    color: #fff;
+}
+
+/* Hamburger for mobile */
+#menu-toggle {
+    display: none;
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    width: 44px;
+    height: 44px;
+    background: #000;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    z-index: 2001;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 0;
+}
+#menu-toggle span {
+    display: block;
+    width: 26px;
+    height: 4px;
+    margin: 4px 0;
+    background: #fff;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+/* Overlay for sidebar on mobile */
+#sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 2000;
+    background: rgba(0,0,0,0.4);
+}
+
+/* Desktop: sidebar slides in on hover */
+@media (min-width: 901px) {
+    #menu-toggle { display: none; }
+    #sidebar-overlay { display: none !important; }
+    #side-nav:hover, body:hover #side-nav { right: 0; }
+}
+
+/* Mobile/tablet: sidebar slides in/out with button */
+@media (max-width: 900px) {
+    #menu-toggle { display: flex; }
+    #side-nav {
+        top: 0;
+        right: -240px;
+        height: 100%;
+        box-shadow: -6px 0 22px 0 #000b;
+        transition: right 0.3s cubic-bezier(.4,2,.6,1);
+    }
+    #side-nav.open { right: 0; }
+    #sidebar-overlay.open { display: block; }
 }
