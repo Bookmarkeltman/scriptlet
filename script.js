@@ -1,78 +1,87 @@
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const { OAuth2Client } = require('google-auth-library');
-const path = require('path');
+// Sidebar and navigation from previous code remain the same...
 
-const app = express();
-const PORT = 3000;
+var ownerEmail = "peanut20230@gmail.com";
 
-// Your Google Client ID and Admin Email
-const GOOGLE_CLIENT_ID = "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com";
-const ADMIN_EMAIL = "peanut20230@gmail.com";
-const COOKIE_SECRET = "your-very-secret-cookie-key-here"; // Change this to something strong
+// On page load, check login state
+window.onload = function () {
+    checkLoginState();
 
-const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+    google.accounts.id.initialize({
+        client_id: "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+        document.getElementById("google-login-container"),
+        { theme: "dark", size: "medium" }
+    );
+    var logoutAdmin = document.getElementById("logout-admin");
+    var logoutUser = document.getElementById("logout-user");
+    if (logoutAdmin) logoutAdmin.onclick = logout;
+    if (logoutUser) logoutUser.onclick = logout;
+    showPage('home');
+};
 
-app.use(express.static(__dirname)); // Serves index.html, styles.css, script.js, etc
-app.use(express.json());
-app.use(cookieParser(COOKIE_SECRET));
-
-// Helper to get user from cookie
-function getUserFromCookie(req) {
-    try {
-        if (!req.signedCookies.user) return null;
-        return JSON.parse(req.signedCookies.user);
-    } catch (e) {
-        return null;
-    }
+function checkLoginState() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/whoami');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            if (data.loggedIn) {
+                showDashboard(data.user.email, data.user.name, data.user.picture);
+            } else {
+                showLoggedOut();
+            }
+        }
+    };
+    xhr.send();
 }
 
-// Login endpoint
-app.post('/login', async (req, res) => {
-    const { credential } = req.body;
-    if (!credential) return res.status(400).json({ error: 'No credential provided' });
+function handleCredentialResponse(response) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/login');
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var data = JSON.parse(xhr.responseText);
+            showDashboard(data.user.email, data.user.name, data.user.picture);
+        } else {
+            alert('Login failed');
+        }
+    };
+    xhr.send(JSON.stringify({ credential: response.credential }));
+}
 
-    try {
-        const ticket = await client.verifyIdToken({
-            idToken: credential,
-            audience: GOOGLE_CLIENT_ID,
-        });
-        const payload = ticket.getPayload();
-        const user = {
-            email: payload.email,
-            name: payload.name,
-            picture: payload.picture
-        };
-        res.cookie('user', JSON.stringify(user), {
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-            httpOnly: true,
-            signed: true,
-            sameSite: 'lax'
-        });
-        res.json({ ok: true, user: user });
-    } catch (e) {
-        res.status(401).json({ error: 'Invalid credential' });
+function showDashboard(email, name, picture) {
+    if (email === ownerEmail) {
+        document.getElementById("admin-profile-picture").src = picture;
+        document.getElementById("admin-email").textContent = email;
+        document.getElementById("admin-name").textContent = name;
+        document.getElementById("admin-dashboard").className = document.getElementById("admin-dashboard").className.replace(/\bhidden\b/g, '');
+        if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
+    } else {
+        document.getElementById("user-profile-picture").src = picture;
+        document.getElementById("user-email").textContent = email;
+        document.getElementById("user-name").textContent = name;
+        document.getElementById("user-dashboard").className = document.getElementById("user-dashboard").className.replace(/\bhidden\b/g, '');
+        if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
     }
-});
+    document.getElementById("google-login-container").className += " hidden";
+}
 
-// Logout endpoint
-app.post('/logout', (req, res) => {
-    res.clearCookie('user');
-    res.json({ ok: true });
-});
+function showLoggedOut() {
+    document.getElementById("google-login-container").className = document.getElementById("google-login-container").className.replace(/\bhidden\b/g, '');
+    if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
+    if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
+}
 
-// Whoami endpoint
-app.get('/whoami', (req, res) => {
-    const user = getUserFromCookie(req);
-    if (!user) return res.json({ loggedIn: false });
-    res.json({ loggedIn: true, user: user, isAdmin: user.email === ADMIN_EMAIL });
-});
+function logout() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/logout');
+    xhr.onload = function() {
+        showLoggedOut();
+    };
+    xhr.send();
+}
 
-// Serve index.html as fallback
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-app.listen(PORT, () => {
-    console.log("Server running at http://localhost:" + PORT);
-});
+// ...Sidebar/mobile nav and showPage() functions as before...
