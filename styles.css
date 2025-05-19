@@ -28,8 +28,7 @@ body {
 }
 
 #side-nav:hover, 
-#side-nav:focus-within, 
-body:hover #side-nav {
+#side-nav:focus-within {
     right: 0;
 }
 
