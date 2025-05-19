@@ -8,8 +8,8 @@ var sidebarOverlay = document.getElementById('sidebar-overlay');
 
 // Open sidebar
 function openSidebar() {
-    sideNav.className = sideNav.className.replace(/\bopen\b/g, '') + ' open';
-    sidebarOverlay.className = sidebarOverlay.className.replace(/\bopen\b/g, '') + ' open';
+    if (sideNav.className.indexOf('open') === -1) sideNav.className += ' open';
+    if (sidebarOverlay.className.indexOf('open') === -1) sidebarOverlay.className += ' open';
 }
 // Close sidebar
 function closeSidebar() {
@@ -41,6 +41,28 @@ for (var i = 0; i < navLinks.length; i++) {
     };
 }
 
+// Simple page routing (no reload)
+function showPage(page) {
+    var pages = document.getElementsByClassName('page');
+    for (var i = 0; i < pages.length; i++) pages[i].className = pages[i].className.replace(/\bhidden\b/g, '');
+    for (var i = 0; i < pages.length; i++) {
+        if (pages[i].id !== 'page-' + page) {
+            if (pages[i].className.indexOf('hidden') === -1) pages[i].className += " hidden";
+        }
+    }
+}
+// Handle navigation click
+for (var i = 0; i < navLinks.length; i++) {
+    navLinks[i].onclick = (function(i) {
+        return function(e) {
+            e.preventDefault();
+            var page = navLinks[i].getAttribute('data-page');
+            if (page) showPage(page);
+            if (window.innerWidth <= 900) closeSidebar();
+        };
+    })(i);
+}
+
 // Google Sign-In and dashboard
 function handleCredentialResponse(response) {
     var data = parseJwt(response.credential);
@@ -53,21 +75,21 @@ function handleCredentialResponse(response) {
         document.getElementById("admin-email").textContent = userEmail;
         document.getElementById("admin-name").textContent = userName;
         document.getElementById("admin-dashboard").className = document.getElementById("admin-dashboard").className.replace(/\bhidden\b/g, '');
-        document.getElementById("user-dashboard").className += " hidden";
+        if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
     } else {
         document.getElementById("user-profile-picture").src = profilePicture;
         document.getElementById("user-email").textContent = userEmail;
         document.getElementById("user-name").textContent = userName;
         document.getElementById("user-dashboard").className = document.getElementById("user-dashboard").className.replace(/\bhidden\b/g, '');
-        document.getElementById("admin-dashboard").className += " hidden";
+        if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
     }
     document.getElementById("google-login-container").className += " hidden";
 }
 
 function logout() {
     document.getElementById("google-login-container").className = document.getElementById("google-login-container").className.replace(/\bhidden\b/g, '');
-    document.getElementById("admin-dashboard").className += " hidden";
-    document.getElementById("user-dashboard").className += " hidden";
+    if (document.getElementById("admin-dashboard").className.indexOf('hidden') === -1) document.getElementById("admin-dashboard").className += " hidden";
+    if (document.getElementById("user-dashboard").className.indexOf('hidden') === -1) document.getElementById("user-dashboard").className += " hidden";
 }
 
 window.onload = function () {
@@ -85,6 +107,8 @@ window.onload = function () {
     var logoutUser = document.getElementById("logout-user");
     if (logoutAdmin) logoutAdmin.onclick = logout;
     if (logoutUser) logoutUser.onclick = logout;
+    // Start on Home page
+    showPage('home');
 };
 
 function parseJwt(token) {
