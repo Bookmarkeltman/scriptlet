@@ -9,7 +9,12 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <!-- Side Navigation (hidden by default, appears on hover) -->
+    <!-- Hamburger button for mobile/tablet -->
+    <button id="menu-toggle" aria-label="Open menu">
+        <span></span><span></span><span></span>
+    </button>
+
+    <!-- Side Navigation -->
     <div id="side-nav">
         <div id="google-login-container">
             <div id="g_id_onload"
@@ -33,28 +38,30 @@
             </ul>
         </nav>
     </div>
+    <!-- Overlay for closing sidebar on mobile -->
+    <div id="sidebar-overlay"></div>
 
     <!-- Main Content -->
     <div id="main-content">
-        <h1>Welcome to My Minimalist Website</h1>
+        <h1>WELCOME TO MY MINIMALIST WEBSITE</h1>
         <p>This is a simple and elegant website with a black-and-white theme and smooth animations.</p>
         <p>Hover over the right side of the screen to reveal the navigation menu!</p>
 
         <!-- Admin Dashboard -->
         <div id="admin-dashboard" class="hidden">
-            <h2>Admin Dashboard</h2>
+            <h2>ADMIN DASHBOARD</h2>
             <img id="admin-profile-picture" alt="Profile Picture">
-            <p>Email: <span id="admin-email"></span></p>
-            <p>Name: <span id="admin-name"></span></p>
+            <p><b>EMAIL:</b> <span id="admin-email"></span></p>
+            <p><b>NAME:</b> <span id="admin-name"></span></p>
             <button id="logout-admin">Switch Account</button>
         </div>
 
         <!-- User Dashboard -->
         <div id="user-dashboard" class="hidden">
-            <h2>User Dashboard</h2>
+            <h2>USER DASHBOARD</h2>
             <img id="user-profile-picture" alt="Profile Picture">
-            <p>Email: <span id="user-email"></span></p>
-            <p>Name: <span id="user-name"></span></p>
+            <p><b>EMAIL:</b> <span id="user-email"></span></p>
+            <p><b>NAME:</b> <span id="user-name"></span></p>
             <button id="logout-user">Switch Account</button>
         </div>
     </div>
