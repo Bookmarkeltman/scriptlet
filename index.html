@@ -1,91 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist Black-and-White Website</title>
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <meta charset="UTF-8">
+  <title>Minimalist Google Login with Firebase</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.7.3/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Hamburger for mobile/tablet -->
-    <button id="menu-toggle" aria-label="Open menu">
-        <span></span><span></span><span></span>
-    </button>
-
-    <!-- Side Navigation -->
-    <!-- Add this somewhere in your sidebar or page -->
-<a href="/login" class="login-btn">Sign in with Google</a>
-    <div id="side-nav">
-        <div id="google-login-container">
-            <div id="g_id_onload"
-                 data-client_id="570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com"
-                 data-callback="handleCredentialResponse"
-                 data-auto_prompt="false">
-            </div>
-            <div class="g_id_signin"
-                 data-type="icon"
-                 data-shape="circle"
-                 data-theme="dark"
-                 data-size="medium">
-            </div>
-        </div>
-        <nav>
-            <ul>
-                <li><a href="#" data-page="home">Home</a></li>
-                <li><a href="#" data-page="about">About</a></li>
-                <li><a href="#" data-page="services">Services</a></li>
-                <li><a href="#" data-page="contact">Contact</a></li>
-            </ul>
-        </nav>
+  <div id="side-nav">
+    <div id="login-container">
+      <button id="login-btn" class="login-btn">Sign in with Google</button>
     </div>
-    <div id="sidebar-overlay"></div>
-
-    <!-- Main Content -->
-    <div id="main-content">
-        <!-- Home Page -->
-        <div class="page" id="page-home">
-            <h1>WELCOME TO MY MINIMALIST WEBSITE</h1>
-            <p>This is a simple and elegant website with a black-and-white theme and smooth animations.</p>
-            <p>Hover over the right side of the screen or tap the menu on mobile to reveal the navigation!</p>
-        </div>
-        <!-- About Page -->
-        <div class="page hidden" id="page-about">
-            <h1>ABOUT</h1>
-            <p>This minimalist site demonstrates login, admin/user dashboards, and responsive navigation.</p>
-        </div>
-        <!-- Services Page -->
-        <div class="page hidden" id="page-services">
-            <h1>SERVICES</h1>
-            <p>We offer clean web design, user authentication, and more, all in a retro-inspired style.</p>
-        </div>
-        <!-- Contact Page -->
-        <div class="page hidden" id="page-contact">
-            <h1>CONTACT</h1>
-            <p>Email: youremail@example.com</p>
-            <p>Twitter: <a href="https://twitter.com/" target="_blank">@yourhandle</a></p>
-        </div>
-
-        <!-- Admin Dashboard -->
-        <div id="add-admin-section" class="hidden" style="margin-top:18px;">     <button id="add-admin-btn">Add Admin</button>>
-            <h2>ADMIN DASHBOARD</h2>
-            <img id="admin-profile-picture" alt="Profile Picture">
-            <p><b>EMAIL:</b> <span id="admin-email"></span></p>
-            <p><b>NAME:</b> <span id="admin-name"></span></p>
-            <button id="logout-admin">Switch Account</button>
-        </div>
-
-        <!-- User Dashboard -->
-        <div id="user-dashboard" class="hidden dashboard">
-            <h2>USER DASHBOARD</h2>
-            <img id="user-profile-picture" alt="Profile Picture">
-            <p><b>EMAIL:</b> <span id="user-email"></span></p>
-            <p><b>NAME:</b> <span id="user-name"></span></p>
-            <button id="logout-user">Switch Account</button>
-        </div>
+    <nav>
+      <ul>
+        <li><a href="#" data-page="home">Home</a></li>
+        <li><a href="#" data-page="about">About</a></li>
+        <li><a href="#" data-page="services">Services</a></li>
+        <li><a href="#" data-page="contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div id="main-content">
+    <div class="page" id="page-home">
+      <h1>WELCOME TO MY MINIMALIST WEBSITE</h1>
+      <p>This is a minimalist website with Google Login (Firebase), admin/user dashboards, and a retro sidebar layout.</p>
     </div>
-
-    <script src="script.js"></script>
+    <div class="page hidden" id="page-about">
+      <h1>ABOUT</h1>
+      <p>This minimalist site demonstrates Google login, admin/user dashboards, and responsive navigation using Firebase.</p>
+    </div>
+    <div class="page hidden" id="page-services">
+      <h1>SERVICES</h1>
+      <p>We offer web design, authentication, and more, all in a retro-inspired style.</p>
+    </div>
+    <div class="page hidden" id="page-contact">
+      <h1>CONTACT</h1>
+      <p>Email: youremail@example.com</p>
+    </div>
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="hidden dashboard">
+      <h2>ADMIN DASHBOARD</h2>
+      <img id="admin-profile-picture" alt="Profile Picture">
+      <p><b>EMAIL:</b> <span id="admin-email"></span></p>
+      <p><b>NAME:</b> <span id="admin-name"></span></p>
+      <button id="logout-admin">Switch Account</button>
+      <div id="add-admin-section" class="hidden" style="margin-top:18px;">
+        <button id="add-admin-btn">Add Admin</button>
+      </div>
+    </div>
+    <!-- User Dashboard -->
+    <div id="user-dashboard" class="hidden dashboard">
+      <h2>USER DASHBOARD</h2>
+      <img id="user-profile-picture" alt="Profile Picture">
+      <p><b>EMAIL:</b> <span id="user-email"></span></p>
+      <p><b>NAME:</b> <span id="user-name"></span></p>
+      <button id="logout-user">Switch Account</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
