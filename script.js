@@ -50,7 +50,7 @@ function parseJwt(token) {
 
 window.onload = function () {
     google.accounts.id.initialize({
-        client_id: "YOUR_GOOGLE_CLIENT_ID",
+        client_id: "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com",
         callback: handleCredentialResponse,
     });
     google.accounts.id.renderButton(
