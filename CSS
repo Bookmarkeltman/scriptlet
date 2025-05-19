@@ -1,6 +1,1 @@
-/* Highlight dashboard when logged in (optional) */
-#admin-dashboard:not(.hidden),
-#user-dashboard:not(.hidden) {
-    box-shadow: 0 0 16px 2px #0ff8, 0 2px 16px #000b;
-    border-color: #0ff;
-}
+
