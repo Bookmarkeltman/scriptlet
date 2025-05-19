@@ -1,64 +1,39 @@
 const ownerEmail = "peanut20230@gmail.com";
 
-// Debug menu logic
-let debugMenuVisible = false;
+// --- SIDEBAR MOBILE LOGIC ---
+const sideNav = document.getElementById('side-nav');
+const menuToggle = document.getElementById('menu-toggle');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
 
-// Create debug menu element
-const debugMenu = document.createElement("div");
-debugMenu.id = "debug-menu";
-debugMenu.innerHTML = `
-    <h3>Debug Menu</h3>
-    <pre id="debug-info"></pre>
-    <button id="close-debug">Close</button>
-`;
-debugMenu.style.display = "none";
-document.body.appendChild(debugMenu);
-
-function showDebugMenu() {
-    debugMenu.style.display = "block";
-    debugMenuVisible = true;
-    updateDebugInfo();
+// Open sidebar
+function openSidebar() {
+    sideNav.classList.add('open');
+    sidebarOverlay.classList.add('open');
 }
 
-function hideDebugMenu() {
-    debugMenu.style.display = "none";
-    debugMenuVisible = false;
+// Close sidebar
+function closeSidebar() {
+    sideNav.classList.remove('open');
+    sidebarOverlay.classList.remove('open');
 }
 
-function updateDebugInfo() {
-    let debugInfo = `
-Location: ${window.location.href}
-User Agent: ${navigator.userAgent}
-Screen Size: ${window.innerWidth} x ${window.innerHeight}
-Login Status: ${
-        document.getElementById("admin-dashboard")?.classList.contains("hidden") &&
-        document.getElementById("user-dashboard")?.classList.contains("hidden")
-            ? "Not logged in"
-            : (document.getElementById("admin-dashboard")?.classList.contains("hidden")
-                ? "User"
-                : "Admin")
-    }
-`;
-    document.getElementById("debug-info").textContent = debugInfo;
-}
-
-// Toggle debug menu with 2 + Delete
-let key2Pressed = false;
-document.addEventListener("keydown", function(e) {
-    if (e.key === "2") key2Pressed = true;
-    if (key2Pressed && (e.key === "Delete" || e.key === "Del")) {
-        debugMenuVisible ? hideDebugMenu() : showDebugMenu();
-        key2Pressed = false;
-    }
+// Toggle on hamburger tap
+menuToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (sideNav.classList.contains('open')) closeSidebar();
+    else openSidebar();
 });
-document.addEventListener("keyup", function(e) {
-    if (e.key === "2") key2Pressed = false;
+// Close sidebar when tapping overlay
+sidebarOverlay.addEventListener('click', closeSidebar);
+
+// Optional: close sidebar on nav tap (mobile)
+sideNav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 900) closeSidebar();
+    });
 });
 
-// Close button in debug menu
-document.getElementById("close-debug").onclick = hideDebugMenu;
-
-// --- Google Auth & Dashboard Logic ---
+// --- GOOGLE LOGIN LOGIC ---
 function handleCredentialResponse(response) {
     const data = parseJwt(response.credential);
     const userEmail = data.email;
@@ -69,18 +44,15 @@ function handleCredentialResponse(response) {
         document.getElementById("admin-profile-picture").src = profilePicture;
         document.getElementById("admin-email").textContent = userEmail;
         document.getElementById("admin-name").textContent = userName;
-
         document.getElementById("admin-dashboard").classList.remove("hidden");
         document.getElementById("user-dashboard").classList.add("hidden");
     } else {
         document.getElementById("user-profile-picture").src = profilePicture;
         document.getElementById("user-email").textContent = userEmail;
         document.getElementById("user-name").textContent = userName;
-
         document.getElementById("user-dashboard").classList.remove("hidden");
         document.getElementById("admin-dashboard").classList.add("hidden");
     }
-
     document.getElementById("google-login-container").classList.add("hidden");
 }
 
@@ -99,7 +71,6 @@ window.onload = function () {
         document.getElementById("google-login-container"),
         { theme: "dark", size: "medium" }
     );
-
     // Bind logout buttons if they exist
     const logoutAdmin = document.getElementById("logout-admin");
     const logoutUser = document.getElementById("logout-user");
