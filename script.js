@@ -1,192 +1,102 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Silkscreen', cursive;
-    background-color: #000;
-    color: #fff;
-    min-height: 100vh;
-    overflow-x: hidden;
+// Compatible with ES5/Server Version 5!
+var ownerEmail = "peanut20230@gmail.com";
+
+// Sidebar for mobile/tablet
+var sideNav = document.getElementById('side-nav');
+var menuToggle = document.getElementById('menu-toggle');
+var sidebarOverlay = document.getElementById('sidebar-overlay');
+
+// Open sidebar
+function openSidebar() {
+    sideNav.className = sideNav.className.replace(/\bopen\b/g, '') + ' open';
+    sidebarOverlay.className = sidebarOverlay.className.replace(/\bopen\b/g, '') + ' open';
+}
+// Close sidebar
+function closeSidebar() {
+    sideNav.className = sideNav.className.replace(/\bopen\b/g, '');
+    sidebarOverlay.className = sidebarOverlay.className.replace(/\bopen\b/g, '');
 }
 
-a {
-    color: #fff;
-    text-decoration: none;
-    transition: color 0.2s;
+if (menuToggle) {
+    menuToggle.onclick = function(e) {
+        e.stopPropagation();
+        if (sideNav.className.indexOf('open') !== -1) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    };
 }
-a:hover {
-    color: #0ff;
-    text-decoration: underline;
-}
-
-/* Sidebar basics */
-#side-nav {
-    position: fixed;
-    top: 0;
-    right: -240px;
-    height: 100%;
-    width: 220px;
-    background-color: #000;
-    border-left: 2px solid #fff;
-    transition: right 0.3s cubic-bezier(.4,2,.6,1);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-top: 40px;
-}
-#side-nav.open { right: 0; }
-
-#side-nav #google-login-container {
-    margin-bottom: 40px;
+if (sidebarOverlay) {
+    sidebarOverlay.onclick = function() {
+        closeSidebar();
+    };
 }
 
-#side-nav nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    text-align: center;
+// Optional: close sidebar on nav tap (mobile)
+var navLinks = sideNav.getElementsByTagName('a');
+for (var i = 0; i < navLinks.length; i++) {
+    navLinks[i].onclick = function() {
+        if (window.innerWidth <= 900) closeSidebar();
+    };
 }
 
-#side-nav nav ul li {
-    margin: 10px 0;
-}
+// Google Sign-In and dashboard
+function handleCredentialResponse(response) {
+    var data = parseJwt(response.credential);
+    var userEmail = data.email;
+    var profilePicture = data.picture;
+    var userName = data.name;
 
-#side-nav nav ul li a {
-    color: #fff;
-    font-size: 1.2em;
-    display: block;
-    padding: 10px 15px;
-    border: 2px solid #fff;
-    background-color: #000;
-    transition: all 0.3s ease-in-out;
-    border-radius: 5px;
-    margin: 0 8px;
-}
-
-#side-nav nav ul li a:hover {
-    background-color: #fff;
-    color: #000;
-}
-
-/* Hamburger menu */
-#menu-toggle {
-    display: none;
-    position: fixed;
-    top: 22px;
-    right: 22px;
-    width: 44px;
-    height: 44px;
-    background: #000;
-    border: 2px solid #fff;
-    border-radius: 8px;
-    z-index: 2001;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 0;
-}
-#menu-toggle span {
-    display: block;
-    width: 26px;
-    height: 4px;
-    margin: 4px 0;
-    background: #fff;
-    border-radius: 2px;
-    transition: 0.3s;
-}
-
-/* Overlay for sidebar on mobile */
-#sidebar-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    z-index: 2000;
-    background: rgba(0,0,0,0.4);
-}
-
-/* Main Content Styling */
-#main-content {
-    min-height: 100vh;
-    min-width: 100vw;
-    box-sizing: border-box;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
-#main-content h1 {
-    font-size: 2.2em;
-    margin-bottom: 20px;
-    letter-spacing: 2px;
-}
-
-#main-content p {
-    font-size: 1.1em;
-    line-height: 1.5;
-    margin: 0 0 10px 0;
-}
-
-#admin-dashboard, #user-dashboard {
-    text-align: center;
-    margin-top: 24px;
-    background: rgba(0,0,0,0.6);
-    border: 1.5px solid #fff;
-    border-radius: 12px;
-    padding: 22px 34px 26px 34px;
-    display: inline-block;
-    min-width: 260px;
-}
-
-#admin-dashboard img, #user-dashboard img {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    margin: 18px 0 12px 0;
-    border: 2px solid #fff;
-}
-
-.hidden {
-    display: none;
-}
-
-button {
-    font-family: 'Silkscreen', cursive;
-    background: #fff;
-    color: #000;
-    border: 2px solid #fff;
-    padding: 8px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 12px;
-    font-size: 1em;
-    transition: background 0.2s, color 0.2s;
-}
-button:hover {
-    background: #000;
-    color: #fff;
-}
-
-/* Desktop hover sidebar */
-@media (min-width: 901px) {
-    #menu-toggle { display: none; }
-    #sidebar-overlay { display: none !important; }
-    #side-nav:hover, body:hover #side-nav { right: 0; }
-}
-
-/* Mobile/tablet: sidebar toggled by button */
-@media (max-width: 900px) {
-    #menu-toggle { display: flex; }
-    #side-nav {
-        top: 0;
-        right: -240px;
-        height: 100%;
-        box-shadow: -6px 0 22px 0 #000b;
-        transition: right 0.3s cubic-bezier(.4,2,.6,1);
+    if (userEmail === ownerEmail) {
+        document.getElementById("admin-profile-picture").src = profilePicture;
+        document.getElementById("admin-email").textContent = userEmail;
+        document.getElementById("admin-name").textContent = userName;
+        document.getElementById("admin-dashboard").className = document.getElementById("admin-dashboard").className.replace(/\bhidden\b/g, '');
+        document.getElementById("user-dashboard").className += " hidden";
+    } else {
+        document.getElementById("user-profile-picture").src = profilePicture;
+        document.getElementById("user-email").textContent = userEmail;
+        document.getElementById("user-name").textContent = userName;
+        document.getElementById("user-dashboard").className = document.getElementById("user-dashboard").className.replace(/\bhidden\b/g, '');
+        document.getElementById("admin-dashboard").className += " hidden";
     }
-    #side-nav.open { right: 0; }
-    #sidebar-overlay.open { display: block; }
+    document.getElementById("google-login-container").className += " hidden";
+}
+
+function logout() {
+    document.getElementById("google-login-container").className = document.getElementById("google-login-container").className.replace(/\bhidden\b/g, '');
+    document.getElementById("admin-dashboard").className += " hidden";
+    document.getElementById("user-dashboard").className += " hidden";
+}
+
+window.onload = function () {
+    // Google Sign-In
+    google.accounts.id.initialize({
+        client_id: "570930287761-q1ore6v7fgr9ijo74kvhl7336qa8sg0d.apps.googleusercontent.com",
+        callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+        document.getElementById("google-login-container"),
+        { theme: "dark", size: "medium" }
+    );
+    // Logout buttons
+    var logoutAdmin = document.getElementById("logout-admin");
+    var logoutUser = document.getElementById("logout-user");
+    if (logoutAdmin) logoutAdmin.onclick = logout;
+    if (logoutUser) logoutUser.onclick = logout;
+};
+
+function parseJwt(token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(
+        window.atob(base64)
+            .split('')
+            .map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join('')
+    );
+    return JSON.parse(jsonPayload);
 }
