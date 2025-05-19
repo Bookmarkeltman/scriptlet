@@ -9,24 +9,22 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <!-- Google Login -->
-    <div id="google-login-container">
-        <div id="g_id_onload"
-             data-client_id="YOUR_GOOGLE_CLIENT_ID"
-             data-login_uri=""
-             data-callback="handleCredentialResponse"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
-             data-type="icon"
-             data-shape="circle"
-             data-theme="dark"
-             data-size="medium">
-        </div>
-    </div>
-
-    <!-- Hidden Navigation -->
+    <!-- Side Navigation (hidden by default, appears on hover) -->
     <div id="side-nav">
+        <div id="google-login-container">
+            <div id="g_id_onload"
+                data-client_id="YOUR_GOOGLE_CLIENT_ID"
+                data-login_uri=""
+                data-callback="handleCredentialResponse"
+                data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                data-type="icon"
+                data-shape="circle"
+                data-theme="dark"
+                data-size="medium">
+            </div>
+        </div>
         <nav>
             <ul>
                 <li><a href="#home">Home</a></li>
