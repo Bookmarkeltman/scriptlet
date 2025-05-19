@@ -6,9 +6,7 @@ function handleCredentialResponse(response) {
     const profilePicture = data.picture;
     const userName = data.name;
 
-    // Check if the user is the owner or an admin
     if (userEmail === ownerEmail) {
-        // Show Admin Dashboard
         document.getElementById("admin-profile-picture").src = profilePicture;
         document.getElementById("admin-email").textContent = userEmail;
         document.getElementById("admin-name").textContent = userName;
@@ -16,7 +14,6 @@ function handleCredentialResponse(response) {
         document.getElementById("admin-dashboard").classList.remove("hidden");
         document.getElementById("user-dashboard").classList.add("hidden");
     } else {
-        // Show User Dashboard
         document.getElementById("user-profile-picture").src = profilePicture;
         document.getElementById("user-email").textContent = userEmail;
         document.getElementById("user-name").textContent = userName;
@@ -25,16 +22,15 @@ function handleCredentialResponse(response) {
         document.getElementById("admin-dashboard").classList.add("hidden");
     }
 
-    // Hide login button
+    // Hide login button after login
     document.getElementById("google-login-container").classList.add("hidden");
 }
 
-// Logout and switch accounts
 document.getElementById("logout-admin").onclick = logout;
 document.getElementById("logout-user").onclick = logout;
 
 function logout() {
-    // Reset the UI
+    // Reset UI
     document.getElementById("google-login-container").classList.remove("hidden");
     document.getElementById("admin-dashboard").classList.add("hidden");
     document.getElementById("user-dashboard").classList.add("hidden");
